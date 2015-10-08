@@ -2,8 +2,8 @@
 
 /**
  *
- * @copyright  2012 so-o.org
- * @revision   1
+ * @copyright  2012-2015 so-o.org
+ * @revision   2
  * @link       http://www.so-o.org
  */
 
@@ -59,10 +59,10 @@ class Definition {
 		$this->revision=$rev;
 		$this->superclass='Object' != $cname ? ($sc ? $sc : $GLOBALS['Object']) : null;
 
-		$this->c_properties=$c_props;
-		$this->i_properties=$i_props;
-		$this->c_messages=$c_msgs;
-		$this->i_messages=$i_msgs;
+		$this->c_properties=$c_props ? array_fill_keys($c_props, 0) : null;
+		$this->i_properties=$i_props ? array_fill_keys($i_props, 0) : null;
+		$this->c_messages=$c_msgs ? array_fill_keys($c_msgs, 0) : null;
+		$this->i_messages=$i_msgs ? array_fill_keys($i_msgs, 0) : null;
 
 		$this->attributes=array();
 	}
@@ -205,12 +205,10 @@ function class_add_class_message($class, $message) {
 	$messages=&class_class_messages($class);
 
 	if (is_null($messages)) {
-		return class_set_class_messages($class, array($message));
+		return class_set_class_messages($class, array($message => 0));
 	}
 
-	if (!in_array($message, $messages)) {
-		$messages[]=$message;
-	}
+	$messages[$message]=0;
 
 	return $class;
 }
@@ -219,11 +217,7 @@ function class_remove_class_message($class, $message) {
 	$messages=&class_class_messages($class);
 
 	if (!is_null($messages)) {
-		$i=array_search($message, $messages);
-
-		if ($i !== false) {
-			unset($messages[$i]);
-		}
+		unset($messages[$message]);
 	}
 
 	return $class;
@@ -233,12 +227,10 @@ function class_add_instance_message($class, $message) {
 	$messages=&class_instance_messages($class);
 
 	if (is_null($messages)) {
-		return class_set_instance_messages($class, array($message));
+		return class_set_instance_messages($class, array($message => 0));
 	}
 
-	if (!in_array($message, $messages)) {
-		$messages[]=$message;
-	}
+	$messages[$message]=0;
 
 	return $class;
 }
@@ -247,11 +239,7 @@ function class_remove_instance_message($class, $message) {
 	$messages=&class_instance_messages($class);
 
 	if (!is_null($messages)) {
-		$i=array_search($message, $messages);
-
-		if ($i !== false) {
-			unset($messages[$i]);
-		}
+		unset($messages[$message]);
 	}
 
 	return $class;
@@ -261,12 +249,10 @@ function class_add_class_property($class, $property) {
 	$properties=&class_class_properties($class);
 
 	if (is_null($properties)) {
-		return class_set_class_properties($class, array($property));
+		return class_set_class_properties($class, array($property => 0));
 	}
 
-	if (!in_array($property, $properties)) {
-		$properties[]=$property;
-	}
+	$properties[$property]=0;
 
 	return $class;
 }
@@ -275,11 +261,7 @@ function class_remove_class_property($class, $property) {
 	$properties=&class_class_properties($class);
 
 	if (!is_null($properties)) {
-		$i=array_search($property, $properties);
-
-		if ($i !== false) {
-			unset($properties[$i]);
-		}
+		unset($properties[$property]);
 	}
 
 	return $class;
@@ -289,12 +271,10 @@ function class_add_instance_property($class, $property) {
 	$properties=&class_instance_properties($class);
 
 	if (is_null($properties)) {
-		return class_set_instance_properties($class, array($property));
+		return class_set_instance_properties($class, array($property => 0));
 	}
 
-	if (!in_array($property, $properties)) {
-		$properties[]=$property;
-	}
+	$properties[$property]=0;
 
 	return $class;
 }
@@ -303,11 +283,7 @@ function class_remove_instance_property(&$class, $property) {
 	$properties=&class_instance_properties($class);
 
 	if (!is_null($properties)) {
-		$i=array_search($property, $properties);
-
-		if ($i !== false) {
-			unset($properties[$i]);
-		}
+		unset($properties[$property]);
 	}
 
 	return $class;
@@ -377,7 +353,7 @@ function class_check($class) {
 
 	$class_messages=class_class_messages($class);
 	if ($class_messages) {
-		$class_messages=array_map('strtolower', $class_messages);
+		$class_messages=array_map('strtolower', array_keys($class_messages));
 	}
 
 	$class_functions=array_filter($defined_functions['user'], create_function('$fname', "return strncmp(\$fname, '$prefix', $len) == 0; return false;"));
@@ -392,7 +368,7 @@ function class_check($class) {
 
 	foreach ($class_functions as $f) {
 		$msg=substr($f, $len);
-		if (is_null($class_messages) or !in_array($msg, $class_messages)) {
+		if (is_null($class_messages) or !isset($class_messages[$msg])) {
 			$errs[1][]=$msg;
 		}
 	}
@@ -402,7 +378,7 @@ function class_check($class) {
 
 	$instance_messages=class_instance_messages($class);
 	if ($instance_messages) {
-		$instance_messages=array_map('strtolower', $instance_messages);
+		$instance_messages=array_map('strtolower', array_keys($instance_messages));
 	}
 
 	$instance_functions=array_filter($defined_functions['user'], create_function('$fname', "return strncmp(\$fname, '$prefix', $len) == 0;"));
@@ -417,7 +393,7 @@ function class_check($class) {
 
 	foreach ($instance_functions as $f) {
 		$msg=substr($f, $len);
-		if (is_null($instance_messages) or !in_array($msg, $instance_messages)) {
+		if (is_null($instance_messages) or !isset($instance_messages[$msg])) {
 			$errs[3][]=$msg;
 		}
 	}
@@ -486,7 +462,7 @@ function object_copy($object) {
 function class_find_class_property($class, $property) {
 	$properties=class_class_properties($class);
 
-	if (!is_null($properties) and in_array($property, $properties)) {
+	if (!is_null($properties) and isset($properties[$property])) {
 		return $property;
 	}
 
@@ -498,7 +474,7 @@ function class_find_class_property($class, $property) {
 function class_find_instance_property($class, $property) {
 	$properties=class_instance_properties($class);
 
-	if (!is_null($properties) and in_array($property, $properties)) {
+	if (!is_null($properties) and isset($properties[$property])) {
 		return $property;
 	}
 
@@ -510,7 +486,7 @@ function class_find_instance_property($class, $property) {
 function class_find_class_method_class($class, $message) {
 	$messages=class_class_messages($class);
 
-	if (!is_null($messages) and in_array($message, $messages)) {
+	if (!is_null($messages) and isset($messages[$message])) {
 		return $class;
 	}
 
@@ -528,7 +504,7 @@ function class_find_class_method($class, $message) {
 function class_find_instance_method_class($class, $message) {
 	$messages=class_instance_messages($class);
 
-	if (!is_null($messages) and in_array($message, $messages)) {
+	if (!is_null($messages) and isset($messages[$message])) {
 		return $class;
 	}
 

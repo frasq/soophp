@@ -2,8 +2,8 @@
 
 /**
  *
- * @copyright  2012 so-o.org
- * @version    1
+ * @copyright  2012-2015 so-o.org
+ * @version    2
  * @link       http://www.so-o.org
  */
 
@@ -116,6 +116,10 @@ function c_write($self) {
 function c_classMessages($self, $inherit=true) {
 	$messages=\OL\class_class_messages($self);
 
+	if ($messages) {
+		$messages=array_keys($messages);
+	}
+
 	if ($inherit) {
 		$superclass=\OL\class_superclass($self);
 
@@ -133,6 +137,10 @@ function c_classMessages($self, $inherit=true) {
 
 function c_instanceMessages($self, $inherit=true) {
 	$messages=\OL\class_instance_messages($self);
+
+	if ($messages) {
+		$messages=array_keys($messages);
+	}
 
 	if ($inherit) {
 		$superclass=\OL\class_superclass($self);
@@ -176,6 +184,10 @@ function c_removeInstanceMessage($self, $message) {
 function c_classProperties($self, $inherit=true) {
 	$properties=\OL\class_class_properties($self);
 
+	if ($properties) {
+		$properties=array_keys($properties);
+	}
+
 	if ($inherit) {
 		$superclass=\OL\class_superclass($self);
 
@@ -193,6 +205,10 @@ function c_classProperties($self, $inherit=true) {
 
 function c_instanceProperties($self, $inherit=true) {
 	$properties=\OL\class_instance_properties($self);
+
+	if ($properties) {
+		$properties=array_keys($properties);
+	}
 
 	if ($inherit) {
 		$superclass=\OL\class_superclass($self);
