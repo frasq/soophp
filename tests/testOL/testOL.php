@@ -2,8 +2,8 @@
 
 /**
  *
- * @copyright  2012 so-o.org
- * @version    1
+ * @copyright  2012-2019 so-o.org
+ * @version    2
  * @link       http://www.so-o.org
  */
 
@@ -83,8 +83,6 @@ $obj=\OL\class_make($Object);
 $x=\OL\class_make($X);
 $y=\OL\class_make($Y);
 
-$x=\OL\class_make($X);
-$y=\OL\class_make($Y);
 dump(\OL\object_attributes($x));
 dump(\OL\object_get($x, 'value'));
 dump(\OL\object_get(\OL\object_set($x, 'value', 1), 'value'));
